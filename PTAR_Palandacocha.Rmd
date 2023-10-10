@@ -1,0 +1,82 @@
+---
+title: "Análisis de datos de Micobacterias ambientales presentes en la Planta de tratamiento de aguas residuales Palandacocha"
+author: "Silvana Morocho, Jefferson Pastuña"
+date: "2023-10-09"
+output:
+  github_document:
+    toc: true
+    toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+usethis::git_vaccinate()
+
+```
+
+# Introducción
+
+General...
+
+# Identificación Molecular
+
+You can include R code in the document as follows:
+
+```{r cars}
+
+code
+
+```
+
+# Estadística
+
+Se usarán índices de diversidad en cada punto de muestreo para un seguimiento al tratamiento de las aguas residuales que realiza la planta Palandacocha. En cambio, todas las especies identificadas en la planta serán consideradas como la diversidad de Micobacterias presentes en las aguas residuales del cantón Tena (representado por aquellas que llegan a la planta Palandacocha).
+
+## Diversidad Alfa
+
+Los índices de diversidad más usados en la literatura son Simpson y Shannon (cita). El índice de Simpson está relacionado con la dominancia de las especies en un área o ecosistema en particular (cita). En este caso se calculará el índice de Simpson en muestras (área o punto de muestreo) antes del ingreso, dentro y a la salida de la planta de tratamiento Palandacocha. De existir una especie dominante a la salida de la planta podría deberse a la resistencia del microorganismo a los métodos descontaminantes empleadas en la planta.
+
+Por otro lado, el índice de Shannon está relacionado a la equidad/uniformidad de las especies en un área o ecosistema en particular (cita). Este estadístico nos permitirá conocer si las diferentes áreas muestrales son iguales, más o menos uniformes. De esta manera, la uniformidad semejante entre los sitios muéstreles podría deberse a la resistencia de los microrganismos a los métodos de descontaminación empleadas en la planta de Palandacocha.
+
+Para los cálculos de la diversidad alfa se usará el paquete R [vegan](https://github.com/vegandevs/vegan/tree/master) disponible en GitHub (vegandevs/vegan). En la siguiente línea de código se instalará y activarán las bibliotecas del paquete R vegan.
+
+```{r vegan, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Instalación del paquete R
+#install.packages("remotes")
+#remotes::install_github("vegandevs/vegan")
+
+# Cargado de las bibliotecas
+library("vegan")
+
+```
+
+### Índice de Simpson
+
+Cargado del libro Excel con los microorganismos identificados en cada punto muestral y cálculo del índice de Simpson.
+
+```{r vegan, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Llamado de datos
+diver_data <- readxl::read_excel("Data/to_palandacocha_diversity.xlsx", 1)
+# Cálculo del índice Simpson
+pal_simp <- diversity(diver_data, index = "simpson")
+
+```
+
+### Índice de Shannon
+
+Descripción
+
+## Diversidad Beta
+
+Descripción
+
+```{r pressure, echo=FALSE}
+
+#her plot
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
