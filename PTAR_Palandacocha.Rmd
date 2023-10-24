@@ -50,6 +50,13 @@ Para los cálculos de la diversidad alfa se usará el paquete R [vegan](https://
 # Cargado de las bibliotecas
 library("vegan")
 
+# Biblioteca para cambiar valores cero por Na
+library(dplyr)
+
+# Biblioteca para crear DataFrame desde Excel
+#devtools::install_github('colearendt/xlsx')
+library(xlsx)
+
 ```
 
 ### Índice de Simpson
@@ -60,8 +67,23 @@ Cargado del libro Excel con los microorganismos identificados en cada punto mues
 
 # Llamado de datos
 diver_data <- readxl::read_excel("Data/to_palandacocha_diversity.xlsx", 1)
+# Creando DataFrame
+diver_data <- data.frame(diver_data)
+# Nombrar filas
+row.names(diver_data) <- diver_data$Site
+# Eliminar columna con los nombres anteriores
+diver_data <- diver_data[1:4,-1]
 # Cálculo del índice Simpson
+pal_rich <- specnumber(diver_data, MARGIN = 1)  # Número de species por área/grupo
+pal_rich
+pal_rich2 <- specnumber(diver_data, MARGIN = 2) # Frecuencia por área/grupo, asigna 1 si la                                                                   # especie fue encontrada en un área/grupo
 pal_simp <- diversity(diver_data, index = "simpson")
+pal_simp
+pal_shan <- diversity(diver_data, index = "shannon")
+pal_shan
+
+# Plot result
+pairs(cbind(pal_shan, pal_simp), pch="*", col="blue")
 
 ```
 
