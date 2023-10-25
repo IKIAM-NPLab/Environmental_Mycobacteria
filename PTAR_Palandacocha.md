@@ -24,16 +24,8 @@ General…
 You can include R code in the document as follows:
 
 ``` r
-summary(cars)
+#code
 ```
-
-    ##      speed           dist       
-    ##  Min.   : 4.0   Min.   :  2.00  
-    ##  1st Qu.:12.0   1st Qu.: 26.00  
-    ##  Median :15.0   Median : 36.00  
-    ##  Mean   :15.4   Mean   : 42.98  
-    ##  3rd Qu.:19.0   3rd Qu.: 56.00  
-    ##  Max.   :25.0   Max.   :120.00
 
 # Estadística
 
@@ -63,14 +55,72 @@ manera, la uniformidad semejante entre los sitios muéstreles podría
 deberse a la resistencia de los microrganismos a los métodos de
 descontaminación empleadas en la planta de Palandacocha.
 
-Para el cálculo de la diversidad alfa se usará el paquete R
-vegan(<https://github.com/vegandevs/vegan/tree/master>) disponible en
+Para los cálculos de la diversidad alfa se usará el paquete R
+[vegan](https://github.com/vegandevs/vegan/tree/master) disponible en
 GitHub (vegandevs/vegan). En la siguiente línea de código se instalará y
-activará las bibliotecas del paquete R vegan.
+activarán las bibliotecas del paquete R vegan.
+
+``` r
+# Instalación del paquete R
+#install.packages("remotes")
+#remotes::install_github("vegandevs/vegan")
+
+# Cargado de las bibliotecas
+library("vegan")
+
+# Biblioteca para cambiar valores cero por Na
+library(dplyr)
+
+# Biblioteca para crear DataFrame desde Excel
+#devtools::install_github('colearendt/xlsx')
+library(xlsx)
+```
 
 ### Índice de Simpson
 
-Descripción
+Cargado del libro Excel con los microorganismos identificados en cada
+punto muestral y cálculo del índice de Simpson.
+
+``` r
+# Llamado de datos
+diver_data <- readxl::read_excel("Data/to_palandacocha_diversity.xlsx", 1)
+# Creando DataFrame
+diver_data <- data.frame(diver_data)
+# Nombrar filas
+row.names(diver_data) <- diver_data$Site
+# Eliminar columna con los nombres anteriores
+diver_data <- diver_data[1:4,-1]
+# Cálculo del índice Simpson
+pal_rich <- specnumber(diver_data, MARGIN = 1)  # Número de species por área/grupo
+pal_rich
+```
+
+    ##  MTH  MCA  MCS Tena 
+    ##    5    4    4    5
+
+``` r
+pal_rich2 <- specnumber(diver_data, MARGIN = 2) # Frecuencia por área/grupo, asigna 1 si la                                                                   # especie fue encontrada en un área/grupo
+pal_simp <- diversity(diver_data, index = "simpson")
+pal_simp
+```
+
+    ##       MTH       MCA       MCS      Tena 
+    ## 0.6875000 0.5454545 0.7200000 0.6770833
+
+``` r
+pal_shan <- diversity(diver_data, index = "shannon")
+pal_shan
+```
+
+    ##      MTH      MCA      MCS     Tena 
+    ## 1.386294 1.033562 1.332179 1.347450
+
+``` r
+# Plot result
+pairs(cbind(pal_shan, pal_simp), pch="*", col="blue")
+```
+
+![](PTAR_Palandacocha_files/figure-gfm/simp-1.png)<!-- -->
 
 ### Índice de Shannon
 
@@ -79,8 +129,6 @@ Descripción
 ## Diversidad Beta
 
 Descripción
-
-![](PTAR_Palandacocha_files/figure-gfm/pressure-1.png)<!-- -->
 
 Note that the `echo = FALSE` parameter was added to the code chunk to
 prevent printing of the R code that generated the plot.

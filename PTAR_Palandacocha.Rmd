@@ -25,7 +25,7 @@ You can include R code in the document as follows:
 
 ```{r cars}
 
-code
+#code
 
 ```
 
@@ -63,7 +63,7 @@ library(xlsx)
 
 Cargado del libro Excel con los microorganismos identificados en cada punto muestral y cálculo del índice de Simpson.
 
-```{r vegan, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r simp, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
 # Llamado de datos
 diver_data <- readxl::read_excel("Data/to_palandacocha_diversity.xlsx", 1)
