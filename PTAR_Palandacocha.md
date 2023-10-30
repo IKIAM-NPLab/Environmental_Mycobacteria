@@ -21,10 +21,18 @@ General…
 
 # Identificación Molecular
 
-You can include R code in the document as follows:
+Previo la identificación molecular de las posibles especies, se realizó
+el control de calidad de la secuenciación Sanger (electroferograma) con
+el paquete [sangeranalyseR](https://github.com/roblanf/sangeranalyseR)
+de R.
 
 ``` r
-#code
+#Instalación y cargado de bibliotecas del paquete sangeranalyseR
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+#BiocManager::install("sangeranalyseR")
+
+library(sangeranalyseR)
 ```
 
 # Estadística
@@ -61,19 +69,11 @@ GitHub (vegandevs/vegan). En la siguiente línea de código se instalará y
 activarán las bibliotecas del paquete R vegan.
 
 ``` r
-# Instalación del paquete R
+# Instalación y cargado de bibliotecas del paquete vegan
 #install.packages("remotes")
 #remotes::install_github("vegandevs/vegan")
 
-# Cargado de las bibliotecas
 library("vegan")
-
-# Biblioteca para cambiar valores cero por Na
-library(dplyr)
-
-# Biblioteca para crear DataFrame desde Excel
-#devtools::install_github('colearendt/xlsx')
-library(xlsx)
 ```
 
 ### Índice de Simpson
@@ -129,6 +129,3 @@ Descripción
 ## Diversidad Beta
 
 Descripción
-
-Note that the `echo = FALSE` parameter was added to the code chunk to
-prevent printing of the R code that generated the plot.

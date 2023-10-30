@@ -21,11 +21,28 @@ General...
 
 # Identificación Molecular
 
-You can include R code in the document as follows:
+Previo la identificación molecular de las posibles especies, se realizó el control de calidad de la secuenciación Sanger (electroferograma) con el paquete [sangeranalyseR](https://github.com/roblanf/sangeranalyseR) de R.
 
-```{r cars}
+## Preprocesamiento
 
-#code
+A continuación, se instaló el paquete sangeranalyseR para el preprocesamiento de los electroferogramas obtenidos de la secuenciación Sanger.
+
+```{r sanger, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+#Instalación y cargado de bibliotecas del paquete sangeranalyseR
+#if (!requireNamespace("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+#BiocManager::install("sangeranalyseR")
+
+library(sangeranalyseR)
+
+```
+
+Se procedió a cargar los electroferogramas (*.ab1) para el análisis.
+
+```{r sanger, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+#
 
 ```
 
@@ -43,19 +60,11 @@ Para los cálculos de la diversidad alfa se usará el paquete R [vegan](https://
 
 ```{r vegan, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-# Instalación del paquete R
+# Instalación y cargado de bibliotecas del paquete vegan
 #install.packages("remotes")
 #remotes::install_github("vegandevs/vegan")
 
-# Cargado de las bibliotecas
 library("vegan")
-
-# Biblioteca para cambiar valores cero por Na
-library(dplyr)
-
-# Biblioteca para crear DataFrame desde Excel
-#devtools::install_github('colearendt/xlsx')
-library(xlsx)
 
 ```
 
@@ -101,4 +110,4 @@ Descripción
 
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
