@@ -42,7 +42,133 @@ Se procedió a cargar los electroferogramas (*.ab1) para el análisis.
 
 ```{r sanger, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-#
+# Directorio de trabajo
+ppath <- "C:/Users/F4ss0/Documents/Ikiam21062022/Environmental_Mycobacteria/"
+# Directorio de datos Sanger
+sanger_files <- file.path(ppath, "Data", "palandacocha_sanger")
+# Observamos los archivos en la carpeta
+#list.files(sanger_files)
+# Filtramos archivos (*.ab1)
+ab1_files <- list.files(path = sanger_files, pattern = "[.]ab1", full.names = TRUE)
+# Creamos un DataFrame vacío
+all_ab1 <- list()
+# Creamos un bucle for para leer todos los archivos
+for(i in 1:24){
+  sanger_read <- SangerRead(printLevel = "SangerRead",
+                           inputSource = "ABIF",
+                           readFeature = "Forward Read",
+                           readFileName = ab1_files[i],
+                           geneticCode = GENETIC_CODE,
+                           TrimmingMethod = "M1",
+                           M1TrimmingCutoff = 0.001, # Para Q = 30
+                           M2CutoffQualityScore = NULL,
+                           M2SlidingWindowSize = NULL,
+                           baseNumPerRow = 100,
+                           heightPerRow = 200,
+                           signalRatioCutoff = 0.33,
+                           showTrimmed = TRUE)
+#  all_ab1[[i]] <- sanger_read
+  writeFasta(sanger_read,
+           outputDir = results_files,
+           compress = FALSE,
+           compression_level = NA)
+}
+
+###### Sola para A1-F-12Y_F08_06 cerca porcinum.ab1#####
+# Leer solo un archivo
+file_12y <- file.path(ppath,
+                      "Data",
+                      "palandacocha_sanger",
+                      "A1-F-12Y_F08_06 cerca porcinum.ab1")
+# Cargado de los electroferogramas Sanger
+clean_sanger <- SangerRead(printLevel = "SangerRead",
+                           inputSource = "ABIF",
+                           readFeature = "Forward Read",
+                           readFileName = file_12y,
+                           geneticCode = GENETIC_CODE,
+                           TrimmingMethod = "M1",
+                           M1TrimmingCutoff = 0.001, # Para Q = 30
+                           M2CutoffQualityScore = NULL,
+                           M2SlidingWindowSize = NULL,
+                           baseNumPerRow = 100,
+                           heightPerRow = 200,
+                           signalRatioCutoff = 0.33,
+                           showTrimmed = TRUE)
+# Reporte de Trimming
+qualityBasePlot(clean_sanger)
+
+# Directorio para guardar cromatogramas Sanger tratados
+results_files <- file.path(ppath, "Result", "palandacocha_results")
+
+# Exportar a formato FASTA
+writeFasta(clean_sanger,
+           outputDir = results_files,
+           compress = FALSE,
+           compression_level = NA)
+
+###### Para A1-F-13Y_E08_05 cosmeticum.ab1#####
+# Leer solo un archivo
+file_13Y <- file.path(ppath,
+                      "Data",
+                      "palandacocha_sanger",
+                      "A1-F-13Y_E08_05 cosmeticum.ab1")
+# Cargado de los electroferogramas Sanger
+clean_sanger_13Y <- SangerRead(printLevel = "SangerRead",
+                           inputSource = "ABIF",
+                           readFeature = "Forward Read",
+                           readFileName = file_13Y,
+                           geneticCode = GENETIC_CODE,
+                           TrimmingMethod = "M1",
+                           M1TrimmingCutoff = 0.001, # Para Q = 30
+                           M2CutoffQualityScore = NULL,
+                           M2SlidingWindowSize = NULL,
+                           baseNumPerRow = 100,
+                           heightPerRow = 200,
+                           signalRatioCutoff = 0.33,
+                           showTrimmed = TRUE)
+# Reporte de Trimming
+qualityBasePlot(clean_sanger_13Y)
+
+# Directorio para guardar cromatogramas Sanger tratados
+results_files <- file.path(ppath, "Result", "palandacocha_results")
+
+# Exportar a formato FASTA
+writeFasta(clean_sanger_13Y,
+           outputDir = results_files,
+           compress = FALSE,
+           compression_level = NA)
+
+###### Para A1-F-15Y_D08_04 cosmeticum.ab1#####
+# Leer solo un archivo
+file_15Y <- file.path(ppath,
+                      "Data",
+                      "palandacocha_sanger",
+                      "A1-F-15Y_D08_04 cosmeticum.ab1")
+# Cargado de los electroferogramas Sanger
+clean_sanger_15Y <- SangerRead(printLevel = "SangerRead",
+                           inputSource = "ABIF",
+                           readFeature = "Forward Read",
+                           readFileName = file_15Y,
+                           geneticCode = GENETIC_CODE,
+                           TrimmingMethod = "M1",
+                           M1TrimmingCutoff = 0.001, # Para Q = 30
+                           M2CutoffQualityScore = NULL,
+                           M2SlidingWindowSize = NULL,
+                           baseNumPerRow = 100,
+                           heightPerRow = 200,
+                           signalRatioCutoff = 0.33,
+                           showTrimmed = TRUE)
+# Reporte de Trimming
+qualityBasePlot(clean_sanger_15Y)
+
+# Directorio para guardar cromatogramas Sanger tratados
+results_files <- file.path(ppath, "Result", "palandacocha_results")
+
+# Exportar a formato FASTA
+writeFasta(clean_sanger_15Y,
+           outputDir = results_files,
+           compress = FALSE,
+           compression_level = NA)
 
 ```
 
