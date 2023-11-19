@@ -6,6 +6,7 @@ output:
   github_document:
     toc: true
     toc_depth: 3
+always_allow_html: true
 ---
 
 ```{r setup, include=FALSE}
@@ -40,135 +41,100 @@ library(sangeranalyseR)
 
 Se procedió a cargar los electroferogramas (*.ab1) para el análisis.
 
-```{r sanger, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+```{r files, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-# Directorio de trabajo
+# Directorio/carpeta de trabajo
 ppath <- "C:/Users/F4ss0/Documents/Ikiam21062022/Environmental_Mycobacteria/"
-# Directorio de datos Sanger
+# Carpeta con los datos Sanger
 sanger_files <- file.path(ppath, "Data", "palandacocha_sanger")
-# Observamos los archivos en la carpeta
+# Confirmamos la precencia de los archivos Sanger en la carpeta
 #list.files(sanger_files)
-# Filtramos archivos (*.ab1)
+# Filtramos la ruta de los archivos (*.ab1)
 ab1_files <- list.files(path = sanger_files, pattern = "[.]ab1", full.names = TRUE)
-# Creamos un DataFrame vacío
+
+```
+
+Unas vez cargadas las secuencias (*.ab1) se procedió con el control de calidad de las mismas. Para ello se tomaron en cuenta los parámetro  recomendados en el trabajo de [Crossley  (2020)](https://doi.org/10.1177%2F1040638720905833). El puntaje de recortado de lectura usado fue 30 (recomendado > 20) usando el método modificado de Mott. El ruido se estableció en 33 % (recomendado < 20 %), con este valor consideramos picos/bases que al menos sean 1/3 del pico más alto (de la secuencia pricipal).
+
+### Ejemplo para un cromatograma
+
+A continuación, se exploran los parámetros con un electroferograma de ejemplo.
+
+```{r load_test, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Cragado del archivo ejemplo
+file_test <- file.path(ppath,
+                      "Data",
+                      "palandacocha_sanger",
+                      "A1-F-12Y_F08_06.ab1")
+# Control de calidad de los nucleótidos
+clean_test <- SangerRead(printLevel = "SangerRead",
+                           inputSource = "ABIF",
+                           readFeature = "Forward Read",
+                           readFileName = file_test,
+                           geneticCode = GENETIC_CODE,
+                           TrimmingMethod = "M1",
+                           M1TrimmingCutoff = 0.001, # Para Q = 30
+                           baseNumPerRow = 100,
+                           heightPerRow = 200,
+                           signalRatioCutoff = 0.33,
+                           showTrimmed = TRUE)
+clean_test
+
+```
+
+Como resultado se obtuvo una secuencia más corta que la inicial con pares de bases (BP) de calidad establecida por el usuario (Q = 30).
+
+También podemos observar el recorte realizada a la secuencia inicial y la calidad de las pares de bases (BP) presentes en la secuencia.
+
+```{r plot_test, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+qual_test <- qualityBasePlot(clean_test)
+qual_test
+
+```
+
+Finalmente, la secuencia será exportada en formato (*.fa) para análisis posteriores.
+
+```{r export_test, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Directorio para guardar los cromatogramas tratados
+results_files <- file.path(ppath, "Result", "palandacocha_results")
+# Exportación del cromatograma preprocesado
+exp_test  <- writeFasta(clean_test,
+                        outputDir = results_files,
+                        compress = FALSE,
+                        compression_level = NA)
+
+```
+
+Una vez obtenidos los parámetros adecuados, se procede a aplicar dichos parámetros para todos los electroferograma.
+
+```{r clean, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Creamos una lista vacía
 all_ab1 <- list()
 # Creamos un bucle for para leer todos los archivos
-for(i in 1:24){
-  sanger_read <- SangerRead(printLevel = "SangerRead",
-                           inputSource = "ABIF",
-                           readFeature = "Forward Read",
-                           readFileName = ab1_files[i],
-                           geneticCode = GENETIC_CODE,
-                           TrimmingMethod = "M1",
-                           M1TrimmingCutoff = 0.001, # Para Q = 30
-                           M2CutoffQualityScore = NULL,
-                           M2SlidingWindowSize = NULL,
-                           baseNumPerRow = 100,
-                           heightPerRow = 200,
-                           signalRatioCutoff = 0.33,
-                           showTrimmed = TRUE)
+#for(i in 1:24){
+#  sanger_read <- SangerRead(printLevel = "SangerRead",
+#                           inputSource = "ABIF",
+#                           readFeature = "Forward Read",
+#                           readFileName = ab1_files[i],
+#                           geneticCode = GENETIC_CODE,
+#                           TrimmingMethod = "M1",
+#                           M1TrimmingCutoff = 0.001, # Para Q = 30
+#                           M2CutoffQualityScore = NULL,
+#                           M2SlidingWindowSize = NULL,
+#                           baseNumPerRow = 100,
+#                           heightPerRow = 200,
+#                           signalRatioCutoff = 0.33,
+#                           showTrimmed = TRUE)
 #  all_ab1[[i]] <- sanger_read
-  writeFasta(sanger_read,
-           outputDir = results_files,
-           compress = FALSE,
-           compression_level = NA)
-}
-
-###### Sola para A1-F-12Y_F08_06 cerca porcinum.ab1#####
-# Leer solo un archivo
-file_12y <- file.path(ppath,
-                      "Data",
-                      "palandacocha_sanger",
-                      "A1-F-12Y_F08_06 cerca porcinum.ab1")
-# Cargado de los electroferogramas Sanger
-clean_sanger <- SangerRead(printLevel = "SangerRead",
-                           inputSource = "ABIF",
-                           readFeature = "Forward Read",
-                           readFileName = file_12y,
-                           geneticCode = GENETIC_CODE,
-                           TrimmingMethod = "M1",
-                           M1TrimmingCutoff = 0.001, # Para Q = 30
-                           M2CutoffQualityScore = NULL,
-                           M2SlidingWindowSize = NULL,
-                           baseNumPerRow = 100,
-                           heightPerRow = 200,
-                           signalRatioCutoff = 0.33,
-                           showTrimmed = TRUE)
-# Reporte de Trimming
-qualityBasePlot(clean_sanger)
-
-# Directorio para guardar cromatogramas Sanger tratados
-results_files <- file.path(ppath, "Result", "palandacocha_results")
-
-# Exportar a formato FASTA
-writeFasta(clean_sanger,
-           outputDir = results_files,
-           compress = FALSE,
-           compression_level = NA)
-
-###### Para A1-F-13Y_E08_05 cosmeticum.ab1#####
-# Leer solo un archivo
-file_13Y <- file.path(ppath,
-                      "Data",
-                      "palandacocha_sanger",
-                      "A1-F-13Y_E08_05 cosmeticum.ab1")
-# Cargado de los electroferogramas Sanger
-clean_sanger_13Y <- SangerRead(printLevel = "SangerRead",
-                           inputSource = "ABIF",
-                           readFeature = "Forward Read",
-                           readFileName = file_13Y,
-                           geneticCode = GENETIC_CODE,
-                           TrimmingMethod = "M1",
-                           M1TrimmingCutoff = 0.001, # Para Q = 30
-                           M2CutoffQualityScore = NULL,
-                           M2SlidingWindowSize = NULL,
-                           baseNumPerRow = 100,
-                           heightPerRow = 200,
-                           signalRatioCutoff = 0.33,
-                           showTrimmed = TRUE)
-# Reporte de Trimming
-qualityBasePlot(clean_sanger_13Y)
-
-# Directorio para guardar cromatogramas Sanger tratados
-results_files <- file.path(ppath, "Result", "palandacocha_results")
-
-# Exportar a formato FASTA
-writeFasta(clean_sanger_13Y,
-           outputDir = results_files,
-           compress = FALSE,
-           compression_level = NA)
-
-###### Para A1-F-15Y_D08_04 cosmeticum.ab1#####
-# Leer solo un archivo
-file_15Y <- file.path(ppath,
-                      "Data",
-                      "palandacocha_sanger",
-                      "A1-F-15Y_D08_04 cosmeticum.ab1")
-# Cargado de los electroferogramas Sanger
-clean_sanger_15Y <- SangerRead(printLevel = "SangerRead",
-                           inputSource = "ABIF",
-                           readFeature = "Forward Read",
-                           readFileName = file_15Y,
-                           geneticCode = GENETIC_CODE,
-                           TrimmingMethod = "M1",
-                           M1TrimmingCutoff = 0.001, # Para Q = 30
-                           M2CutoffQualityScore = NULL,
-                           M2SlidingWindowSize = NULL,
-                           baseNumPerRow = 100,
-                           heightPerRow = 200,
-                           signalRatioCutoff = 0.33,
-                           showTrimmed = TRUE)
-# Reporte de Trimming
-qualityBasePlot(clean_sanger_15Y)
-
-# Directorio para guardar cromatogramas Sanger tratados
-results_files <- file.path(ppath, "Result", "palandacocha_results")
-
-# Exportar a formato FASTA
-writeFasta(clean_sanger_15Y,
-           outputDir = results_files,
-           compress = FALSE,
-           compression_level = NA)
+#  writeFasta(sanger_read,
+#           outputDir = results_files,
+#           compress = FALSE,
+#           compression_level = NA)
+#}
 
 ```
 
