@@ -3,10 +3,10 @@ title: "Análisis de datos de Micobacterias ambientales presentes en la Planta d
 author: "Silvana Morocho, Jefferson Pastuña"
 date: "2023-10-09"
 output:
-  github_document:
-    toc: true
-    toc_depth: 3
-always_allow_html: true
+    html_document:
+      keep_md: true
+      toc: true
+      toc_depth: 3
 ---
 
 ```{r setup, include=FALSE}
@@ -49,7 +49,7 @@ ppath <- "C:/Users/F4ss0/Documents/Ikiam21062022/Environmental_Mycobacteria/"
 sanger_files <- file.path(ppath, "Data", "palandacocha_sanger")
 # Confirmamos la precencia de los archivos Sanger en la carpeta
 #list.files(sanger_files)
-# Filtramos la ruta de los archivos (*.ab1)
+# Filtramos solo archivos (*.ab1)
 ab1_files <- list.files(path = sanger_files, pattern = "[.]ab1", full.names = TRUE)
 
 ```
@@ -99,44 +99,90 @@ Finalmente, la secuencia será exportada en formato (*.fa) para análisis poster
 ```{r export_test, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
 # Directorio para guardar los cromatogramas tratados
-results_files <- file.path(ppath, "Result", "palandacocha_results")
+results_test <- file.path(ppath, "Result", "palandacocha_results", "test_results")
 # Exportación del cromatograma preprocesado
 exp_test  <- writeFasta(clean_test,
-                        outputDir = results_files,
+                        outputDir = results_test,
                         compress = FALSE,
                         compression_level = NA)
 
 ```
 
-Una vez obtenidos los parámetros adecuados, se procede a aplicar dichos parámetros para todos los electroferograma.
+### Preprocesamiento en Batch
+
+Una vez obtenidos los parámetros adecuados, se procede a aplicar dichos parámetros para todos los electroferograma. Los electroferograma tratados fueron exportados en formato (*.fa) para análisis posteriores. 
 
 ```{r clean, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
+# Directorio para guardar los cromatogramas tratados
+results_files <- file.path(ppath, "Result", "palandacocha_results")
 # Creamos una lista vacía
 all_ab1 <- list()
-# Creamos un bucle for para leer todos los archivos
-#for(i in 1:24){
-#  sanger_read <- SangerRead(printLevel = "SangerRead",
-#                           inputSource = "ABIF",
-#                           readFeature = "Forward Read",
-#                           readFileName = ab1_files[i],
-#                           geneticCode = GENETIC_CODE,
-#                           TrimmingMethod = "M1",
-#                           M1TrimmingCutoff = 0.001, # Para Q = 30
-#                           M2CutoffQualityScore = NULL,
-#                           M2SlidingWindowSize = NULL,
-#                           baseNumPerRow = 100,
-#                           heightPerRow = 200,
-#                           signalRatioCutoff = 0.33,
-#                           showTrimmed = TRUE)
-#  all_ab1[[i]] <- sanger_read
-#  writeFasta(sanger_read,
-#           outputDir = results_files,
-#           compress = FALSE,
-#           compression_level = NA)
-#}
+# Usamos un bucle for para preprocesar todos los archivos
+for(i in 1:24){
+  sanger_read <- SangerRead(printLevel = "SangerRead",
+                           inputSource = "ABIF",
+                           readFeature = "Forward Read",
+                           readFileName = ab1_files[i],
+                           geneticCode = GENETIC_CODE,
+                           TrimmingMethod = "M1",
+                           M1TrimmingCutoff = 0.001, # Para Q = 30
+                           M2CutoffQualityScore = NULL,
+                           M2SlidingWindowSize = NULL,
+                           baseNumPerRow = 100,
+                           heightPerRow = 200,
+                           signalRatioCutoff = 0.33,
+                           showTrimmed = TRUE)
+  writeFasta(sanger_read,
+           outputDir = results_files,
+           compress = FALSE,
+           compression_level = NA)
+}
 
 ```
+
+## BLAST
+
+Una vez limpiadas las secuencias se procedió a la identificación de especies mediante la comparación de secuecnias. Para ello, se precedió a instalar el paquete ["annotate"](https://doi.org/10.18129/B9.bioc.annotate).
+
+```{r blast, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Instalación del paquete "annotate"
+#if (!require("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+BiocManager::install("annotate")
+# Cargado de la biblioteca del paquete "annotate"
+library("annotate")
+
+```
+
+Ejemplo de identificación molecular para una secuencia.
+
+```{r fa_files, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Cragado del archivo ejemplo
+fa_test <- file.path(ppath,
+                      "Result",
+                      "palandacocha_results",
+                      "test_results",
+                      "A1-F-12Y_F08_06.fa")
+# Control de calidad de los nucleótidos
+ident_test <- SangerRead(inputSource = "FASTA",
+                         readFeature = "Forward Read",
+                         readFileName = fa_test,
+                         fastaReadName = "A1-F-12Y_F08_06.ab1",
+                         geneticCode = GENETIC_CODE)
+
+blast_test <- blastSequences(paste(ident_test@primarySeq),as='data.frame')
+blast_test$Hit_def
+#  all_ab1[[i]] <- sanger_read
+#merge_test <- merge(all_ab1[1], all_ab1[2], by = "readName")
+
+```
+
+# Árbol filogenético
+
+
 
 # Estadística
 
