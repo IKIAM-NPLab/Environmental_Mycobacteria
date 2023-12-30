@@ -18,11 +18,11 @@ usethis::git_vaccinate()
 
 # Introducción
 
-General...
+Se muestreó en tres puntos de la Planta de tratamiento de aguas residuales en la provincia de Napo-Ecuador: tanque de homogeneización (MTH), cámara anóxica (MCA), y cámara de salida (MCS). Las muestras de agua fueron cultivadas en medio de cultivo sólido selectivo para al género *Mycobacterium*. Posteriormente, se realizó extracción de ADN de las colonias aisladas, amplificación del gen 16S rRNA y secuenciación mediante el método Sanger. El objetivo del presente script R fue registrar los procedimientos de control de calidad de las secuencias Sanger y tratamientos estadísticos. En cada paso se registrará un breve detalle de los códigos usados y gráficos de ser el caso.
 
 # Identificación Molecular
 
-Previo la identificación molecular de las posibles especies, se realizó el control de calidad de la secuenciación Sanger (electroferograma) con el paquete [sangeranalyseR](https://github.com/roblanf/sangeranalyseR) de R.
+Previo la identificación molecular de las posibles especies de Micobacterias aisladas, se realizó el control de calidad de la secuenciación Sanger (electroferograma) mediante el paquete [sangeranalyseR](https://github.com/roblanf/sangeranalyseR) de R.
 
 ## Preprocesamiento
 
@@ -30,31 +30,35 @@ A continuación, se instaló el paquete sangeranalyseR para el preprocesamiento 
 
 ```{r sanger, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-#Instalación y cargado de bibliotecas del paquete sangeranalyseR
+# Instalación del paquete sangeranalyseR
 #if (!requireNamespace("BiocManager", quietly = TRUE))
 #    install.packages("BiocManager")
 #BiocManager::install("sangeranalyseR")
 
+# Cargado de la biblioteca del paquete sangeranalyseR
 library(sangeranalyseR)
 
 ```
 
-Se procedió a cargar los electroferogramas (*.ab1) para el análisis.
+Se procedió a cargar los electroferogramas (*.ab1) para el análisis de calidad.
 
 ```{r files, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
 # Directorio/carpeta de trabajo
-ppath <- "C:/Users/F4ss0/Documents/Ikiam21062022/Environmental_Mycobacteria/"
+ppath <- "../Environmental_Mycobacteria/"
+
 # Carpeta con los datos Sanger
 sanger_files <- file.path(ppath, "Data", "palandacocha_sanger")
-# Confirmamos la precencia de los archivos Sanger en la carpeta
+
+# Confirmamos la presencia de los archivos Sanger en la carpeta
 #list.files(sanger_files)
+
 # Filtramos solo archivos (*.ab1)
 ab1_files <- list.files(path = sanger_files, pattern = "[.]ab1", full.names = TRUE)
 
 ```
 
-Unas vez cargadas las secuencias (*.ab1) se procedió con el control de calidad de las mismas. Para ello se tomaron en cuenta los parámetro  recomendados en el trabajo de [Crossley  (2020)](https://doi.org/10.1177%2F1040638720905833). El puntaje de recortado de lectura usado fue 30 (recomendado > 20) usando el método modificado de Mott. El ruido se estableció en 33 % (recomendado < 20 %), con este valor consideramos picos/bases que al menos sean 1/3 del pico más alto (de la secuencia pricipal).
+Una vez cargadas las secuencias (*.ab1) se procedió con el control de calidad de la secuenciación de Sanger. Para ello se tomaron en cuenta los parámetros recomendados en el trabajo de [Crossley (2020)](https://doi.org/10.1177%2F1040638720905833). El puntaje de recortado de lectura usado fue 30 (recomendado > 20) de acuerdo con el puntaje de calidad Phred calculado con método modificado de Mott. El ruido se estableció en 33 % (recomendado < 20 %), con este valor consideramos picos o pares de bases (bp) que al menos alcancen 1/3 del pico más alto (o de la secuencia principal).
 
 ### Ejemplo para un cromatograma
 
@@ -62,11 +66,12 @@ A continuación, se exploran los parámetros con un electroferograma de ejemplo.
 
 ```{r load_test, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-# Cragado del archivo ejemplo
+# Cargado del archivo ejemplo
 file_test <- file.path(ppath,
                       "Data",
                       "palandacocha_sanger",
                       "A1-F-12Y_F08_06.ab1")
+
 # Control de calidad de los nucleótidos
 clean_test <- SangerRead(printLevel = "SangerRead",
                            inputSource = "ABIF",
@@ -83,16 +88,19 @@ clean_test
 
 ```
 
-Como resultado se obtuvo una secuencia más corta que la inicial con pares de bases (BP) de calidad establecida por el usuario (Q = 30).
+Como resultado se obtuvo una secuencia más corta que la inicial, pero con bp de puntaje de calidad de Phred superior al 30 (Q = 30).
 
-También podemos observar el recorte realizada a la secuencia inicial y la calidad de las pares de bases (BP) presentes en la secuencia.
+A continuación, se muestra un gráfico con la secuencia recortada (eje X) y la calidad de las pares de bases (eje Y).
 
 ```{r plot_test, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
+# Gráfico de calidad de bp
 qual_test <- qualityBasePlot(clean_test)
-qual_test
+qual_test # Imagen disponible en formato HTML
 
 ```
+
+![](Result/palandacocha_results/test_results/Quality_test_plot.png)
 
 Finalmente, la secuencia será exportada en formato (*.fa) para análisis posteriores.
 
@@ -100,6 +108,7 @@ Finalmente, la secuencia será exportada en formato (*.fa) para análisis poster
 
 # Directorio para guardar los cromatogramas tratados
 results_test <- file.path(ppath, "Result", "palandacocha_results", "test_results")
+
 # Exportación del cromatograma preprocesado
 exp_test  <- writeFasta(clean_test,
                         outputDir = results_test,
@@ -110,16 +119,15 @@ exp_test  <- writeFasta(clean_test,
 
 ### Preprocesamiento en Batch
 
-Una vez obtenidos los parámetros adecuados, se procede a aplicar dichos parámetros para todos los electroferograma. Los electroferograma tratados fueron exportados en formato (*.fa) para análisis posteriores. 
+Una vez obtenidos los parámetros adecuados, se procede a aplicar dichos parámetros para todos los electroferogramas. Luego, los electroferograma tratados fueron exportados en formato (*.fa) para análisis posteriores.
 
 ```{r clean, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
 # Directorio para guardar los cromatogramas tratados
 results_files <- file.path(ppath, "Result", "palandacocha_results")
-# Creamos una lista vacía
-all_ab1 <- list()
-# Usamos un bucle for para preprocesar todos los archivos
-for(i in 1:24){
+
+# Usamos un bucle for para preprocesar todos los datos
+for(i in 1:33){
   sanger_read <- SangerRead(printLevel = "SangerRead",
                            inputSource = "ABIF",
                            readFeature = "Forward Read",
@@ -143,40 +151,41 @@ for(i in 1:24){
 
 ## BLAST
 
-Una vez limpiadas las secuencias se procedió a la identificación de especies mediante la comparación de secuecnias. Para ello, se precedió a instalar el paquete ["annotate"](https://doi.org/10.18129/B9.bioc.annotate).
+Una vez limpiadas las secuencias se procedió con la identificación de especies mediante la comparación de secuencias experimentales con las secuencias de la base de datos de BLAST. Para ello, se usó el paquete R ["annotate"](https://doi.org/10.18129/B9.bioc.annotate).
 
 ```{r blast, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-# Instalación del paquete "annotate"
+# Instalación del paquete annotate
 #if (!require("BiocManager", quietly = TRUE))
 #    install.packages("BiocManager")
-BiocManager::install("annotate")
-# Cargado de la biblioteca del paquete "annotate"
+#BiocManager::install("annotate")
+
+# Cargado de la biblioteca del paquete annotate
 library("annotate")
 
 ```
 
-Ejemplo de identificación molecular para una secuencia.
+Ejemplo de identificación molecular mediante BLAST para una secuencia.
 
 ```{r fa_files, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-# Cragado del archivo ejemplo
+# Cargado del archivo ejemplo
 fa_test <- file.path(ppath,
                       "Result",
                       "palandacocha_results",
                       "test_results",
                       "A1-F-12Y_F08_06.fa")
-# Control de calidad de los nucleótidos
+
+# Características generales de la secuencia ejemplo
 ident_test <- SangerRead(inputSource = "FASTA",
                          readFeature = "Forward Read",
                          readFileName = fa_test,
                          fastaReadName = "A1-F-12Y_F08_06.ab1",
                          geneticCode = GENETIC_CODE)
 
+# Lista de especies coincididas con la secuencia ejemplo
 blast_test <- blastSequences(paste(ident_test@primarySeq),as='data.frame')
 blast_test$Hit_def
-#  all_ab1[[i]] <- sanger_read
-#merge_test <- merge(all_ab1[1], all_ab1[2], by = "readName")
 
 ```
 
