@@ -3,10 +3,10 @@ title: "Análisis de datos de Micobacterias ambientales presentes en la Planta d
 author: "Silvana Morocho, Jefferson Pastuña"
 date: "2023-10-09"
 output:
-    html_document:
-      keep_md: true
-      toc: true
-      toc_depth: 3
+  github_document:
+    toc: true
+    toc_depth: 3
+always_allow_html: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -18,11 +18,11 @@ usethis::git_vaccinate()
 
 # Introducción
 
-Se muestreó en tres puntos de la Planta de tratamiento de aguas residuales en la provincia de Napo-Ecuador: tanque de homogeneización (MTH), cámara anóxica (MCA), y cámara de salida (MCS). Las muestras de agua fueron cultivadas en medio de cultivo sólido selectivo para al género *Mycobacterium*. Posteriormente, se realizó extracción de ADN de las colonias aisladas, amplificación del gen 16S rRNA y secuenciación mediante el método Sanger. El objetivo del presente script R fue registrar los procedimientos de control de calidad de las secuencias Sanger y tratamientos estadísticos. En cada paso se registrará un breve detalle de los códigos usados y gráficos de ser el caso.
+Se muestreó tres puntos dentro de la Planta de tratamiento de aguas residuales en la provincia de Napo, Ecuador: tanque de homogeneización (MTH), cámara anóxica (MCA), y cámara de salida (MCS). Las muestras de agua fueron cultivadas en medio de cultivo sólido selectivo para al género *Mycobacterium*. Posteriormente, se realizó extracción de ADN de las colonias aisladas, amplificación del gen 16S rRNA y secuenciación mediante el método Sanger. El objetivo del presente script R fue registrar los procedimientos de control de calidad de las secuencias Sanger y análisis de diversidad. En cada paso se registrará un breve detalle de los códigos usados y gráficos de ser el caso.
 
 # Identificación Molecular
 
-Previo la identificación molecular de las posibles especies de Micobacterias aisladas, se realizó el control de calidad de la secuenciación Sanger (electroferograma) mediante el paquete [sangeranalyseR](https://github.com/roblanf/sangeranalyseR) de R.
+Previo la identificación molecular de las posibles especies de Micobacterias aisladas, se realizó el control de calidad de la secuenciación Sanger (electroferograma) mediante el paquete ["sangeranalyseR"](https://github.com/roblanf/sangeranalyseR) de R.
 
 ## Preprocesamiento
 
@@ -96,7 +96,7 @@ A continuación, se muestra un gráfico con la secuencia recortada (eje X) y la 
 
 # Gráfico de calidad de bp
 qual_test <- qualityBasePlot(clean_test)
-qual_test # Imagen disponible en formato HTML
+#qual_test # Imagen interactividad disponible en la salida HTML
 
 ```
 
@@ -189,72 +189,67 @@ blast_test$Hit_def
 
 ```
 
-# Árbol filogenético
+# Análisis de diversidad
 
-
-
-# Estadística
-
-Se usarán índices de diversidad en cada punto de muestreo para un seguimiento al tratamiento de las aguas residuales que realiza la planta Palandacocha. En cambio, todas las especies identificadas en la planta serán consideradas como la diversidad de Micobacterias presentes en las aguas residuales del cantón Tena (representado por aquellas que llegan a la planta Palandacocha).
+Luego de identificación de especies se usarán índices de diversidad en cada punto de muestreo para un seguimiento al tratamiento de las aguas residuales que realiza la planta Palandacocha. En cambio, todas las especies identificadas en la planta serán consideradas como la diversidad de Micobacterias presentes en las aguas residuales del cantón Tena (representado por aquellas que llegan a la planta Palandacocha).
 
 ## Diversidad Alfa
 
-Los índices de diversidad más usados en la literatura son Simpson y Shannon (cita). El índice de Simpson está relacionado con la dominancia de las especies en un área o ecosistema en particular (cita). En este caso se calculará el índice de Simpson en muestras (área o punto de muestreo) antes del ingreso, dentro y a la salida de la planta de tratamiento Palandacocha. De existir una especie dominante a la salida de la planta podría deberse a la resistencia del microorganismo a los métodos descontaminantes empleadas en la planta.
-
-Por otro lado, el índice de Shannon está relacionado a la equidad/uniformidad de las especies en un área o ecosistema en particular (cita). Este estadístico nos permitirá conocer si las diferentes áreas muestrales son iguales, más o menos uniformes. De esta manera, la uniformidad semejante entre los sitios muéstreles podría deberse a la resistencia de los microrganismos a los métodos de descontaminación empleadas en la planta de Palandacocha.
-
-Para los cálculos de la diversidad alfa se usará el paquete R [vegan](https://github.com/vegandevs/vegan/tree/master) disponible en GitHub (vegandevs/vegan). En la siguiente línea de código se instalará y activarán las bibliotecas del paquete R vegan.
+Los índices de diversidad alfa usados en la literatura son Simpson y Shannon [(Pontiroli et al., 2013)](https://doi.org/10.1371%2Fjournal.pone.0068648). Para los cálculos de la diversidad alfa se usará el paquete R ["vegan"](https://github.com/vegandevs/vegan/tree/master) disponible en GitHub (vegandevs/vegan). En la siguiente línea de código se instalará y activarán las bibliotecas del paquete R "vegan".
 
 ```{r vegan, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-# Instalación y cargado de bibliotecas del paquete vegan
+# Instalación paquete vegan
 #install.packages("remotes")
 #remotes::install_github("vegandevs/vegan")
 
+# Cargado de la biblioteca del paquete vegan
 library("vegan")
+
+```
+
+A continuación, se cargará a R el libro Excel con los microorganismos identificados en las cepas aisladas de cada punto muestral.
+
+```{r excel, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
+
+# Llamado de datos
+diver_data <- readxl::read_excel("Data/to_palandacocha_diversity.xlsx", 2)
+# Creando un DataFrame
+diver_data <- data.frame(diver_data)
+# Agregando nombre a las filas
+row.names(diver_data) <- diver_data$Site
+# Eliminando la columna con los nombres anteriores
+diver_data <- diver_data[1:4,-1]
 
 ```
 
 ### Índice de Simpson
 
-Cargado del libro Excel con los microorganismos identificados en cada punto muestral y cálculo del índice de Simpson.
+El índice de Simpson está relacionado con la dominancia de las especies en un área o ecosistema en particular [(Gregorius y Gillet, 2008)](https://doi.org/10.1016/j.ecolmodel.2007.08.026). En este caso se calculará el índice de Simpson en muestras (área o punto de muestreo) antes del ingreso (MTH), dentro (MCA) y a la salida (MCS) de la planta de tratamiento Palandacocha. De existir una especie dominante a la salida de la planta, el índice de Simpson tenderá más hacia el valor 0 que los demás sitios, lo cual podría deberse a la resistencia de cierta especie a los métodos descontaminantes empleadas en la planta.
+
 
 ```{r simp, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-# Llamado de datos
-diver_data <- readxl::read_excel("Data/to_palandacocha_diversity.xlsx", 1)
-# Creando DataFrame
-diver_data <- data.frame(diver_data)
-# Nombrar filas
-row.names(diver_data) <- diver_data$Site
-# Eliminar columna con los nombres anteriores
-diver_data <- diver_data[1:4,-1]
-# Cálculo del índice Simpson
-pal_rich <- specnumber(diver_data, MARGIN = 1)  # Número de species por área/grupo
+# Cálculo de riqueza de especies
+# Número de species por área/grupo
+pal_rich <- specnumber(diver_data, MARGIN = 1)
 pal_rich
-pal_rich2 <- specnumber(diver_data, MARGIN = 2) # Frecuencia por área/grupo, asigna 1 si la                                                                   # especie fue encontrada en un área/grupo
+
+# Cálculo del índice Simpson
 pal_simp <- diversity(diver_data, index = "simpson")
 pal_simp
-pal_shan <- diversity(diver_data, index = "shannon")
-pal_shan
-
-# Plot result
-pairs(cbind(pal_shan, pal_simp), pch="*", col="blue")
 
 ```
 
 ### Índice de Shannon
 
-Descripción
+Por otro lado, el índice de Shannon está relacionado a la equidad/uniformidad de las especies en un área o ecosistema en particular [(Konopiński, 2020)](https://doi.org/10.7717/peerj.9391). Este índice nos permitirá conocer si las diferentes áreas muestrales son iguales, más o menos uniformes.
 
-## Diversidad Beta
+```{r shan, echo=TRUE, message=FALSE, warning=FALSE, error=FALSE}
 
-Descripción
-
-```{r pressure, echo=FALSE}
-
-#her plot
+# Cálculo del índice Shannon
+pal_shan <- diversity(diver_data, index = "shannon")
+pal_shan
 
 ```
-
 
