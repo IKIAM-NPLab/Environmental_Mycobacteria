@@ -227,10 +227,10 @@ blast_test$Hit_def
     ##  [5] "Mycolicibacterium sp. strain H4_3_1 16S ribosomal RNA gene, partial sequence"                        
     ##  [6] "Mycolicibacterium mageritense H4_3_1 DNA, complete genome"                                           
     ##  [7] "Mycolicibacterium mageritense H4_3_1 DNA, complete genome"                                           
-    ##  [8] "Mycobacterium sp. strain S2_3_2 16S ribosomal RNA gene, partial sequence"                            
-    ##  [9] "Mycobacterium sp. strain S2_3_1 16S ribosomal RNA gene, partial sequence"                            
-    ## [10] "Actinomycetia bacterium strain 21406-S.27F.15689466.G03.seq 16S ribosomal RNA gene, partial sequence"
-    ## [11] "Actinomycetia bacterium strain 21275-S.27F.15064399.D05.seq 16S ribosomal RNA gene, partial sequence"
+    ##  [8] "Actinomycetia bacterium strain 21406-S.27F.15689466.G03.seq 16S ribosomal RNA gene, partial sequence"
+    ##  [9] "Actinomycetia bacterium strain 21275-S.27F.15064399.D05.seq 16S ribosomal RNA gene, partial sequence"
+    ## [10] "Actinomycetia bacterium strain 21208-S.27F.14651555.E10.seq 16S ribosomal RNA gene, partial sequence"
+    ## [11] "Actinomycetia bacterium strain 21042-S.27F.13899355.A12.seq 16S ribosomal RNA gene, partial sequence"
 
 # Análisis de diversidad
 
@@ -294,7 +294,7 @@ pal_rich
 ```
 
     ##  MTH  MCA  MCS Tena 
-    ##    3    5    3    6
+    ##    3    5    4    7
 
 ``` r
 # Cálculo del índice Simpson
@@ -303,7 +303,7 @@ pal_simp
 ```
 
     ##       MTH       MCA       MCS      Tena 
-    ## 0.3571429 0.6805556 0.6400000 0.5764828
+    ## 0.3571429 0.6805556 0.7222222 0.6015625
 
 ### Índice de Shannon
 
@@ -320,4 +320,4 @@ pal_shan
 ```
 
     ##       MTH       MCA       MCS      Tena 
-    ## 0.6559757 1.3579779 1.0549202 1.1931006
+    ## 0.6559757 1.3579779 1.3296613 1.2948770
